@@ -1,0 +1,19 @@
+# Node.js / Backend
+node_modules/
+npm-debug.log
+
+# This is CRITICAL. Never commit your passwords or API keys!
+.env
+
+# React / Frontend
+build/
+.next/
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+
+# VS Code
+.vscode/
