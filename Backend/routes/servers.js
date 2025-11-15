@@ -7,7 +7,6 @@ const authMiddleware = require('../middleware/auth'); // "Hire" our Bouncer!
 const router = express.Router(); // Create our "mini-manager" for this room
 
 // --- THE "CREATE A SERVER" COUNTER: POST /api/servers ---
-//
 // 💡 This is the magic!
 // We put our "Bouncer" (authMiddleware) in the middle.
 // This route now says: "To create a server, you MUST pass the Bouncer's check first."
@@ -34,12 +33,46 @@ router.post('/', authMiddleware, async (req, res) => {
         );
 
         const newServer = result.rows[0];
+        // 4. 💡 ADD THIS NEW BLOCK 💡
+        // As the owner, you should also be the first member.
+        await pool.query(
+            'INSERT INTO ServerMembers (user_id, server_id, role) VALUES ($1, $2, $3)',
+            [ownerId, newServer.id, 'OWNER']
+        );
 
         // 4. Success! Send back the new server's info
         res.status(201).json(newServer);
 
     } catch (err) {
         console.error("Create Server Error:", err.message);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// --- THE "GET MY SERVERS" COUNTER: GET /api/servers ---
+// We're *also* protecting this with our Bouncer!
+router.get('/', authMiddleware, async (req, res) => {
+    
+    // 1. Get the user's ID from the Bouncer's "hand stamp"
+    const userId = req.user.userId;
+
+    try {
+        // 2. Find all servers this user is a member of.
+        // This is our first complex "JOIN" query!
+        // It says: "Look at the Servers table, but only give me the ones
+        // where this user's ID is in the ServerMembers table."
+        const result = await pool.query(
+            `SELECT Servers.* FROM Servers
+             JOIN ServerMembers ON Servers.id = ServerMembers.server_id
+             WHERE ServerMembers.user_id = $1`,
+            [userId]
+        );
+
+        // 3. Send back the list of servers
+        res.json(result.rows);
+
+    } catch (err) {
+        console.error("Get Servers Error:", err.message);
         res.status(500).json({ error: 'Server error' });
     }
 });
