@@ -37,8 +37,8 @@ router.post('/', authMiddleware, async (req, res) => {
         // As the owner, you should also be the first member.
         await pool.query(
             'INSERT INTO ServerMembers (user_id, server_id, role) VALUES ($1, $2, $3)',
-            [ownerId, newServer.id, 'OWNER']
-        );
+        [ownerId, newServer.id, 'OWNER']
+    );
 
         // 4. Success! Send back the new server's info
         res.status(201).json(newServer);
