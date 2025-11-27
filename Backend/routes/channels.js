@@ -54,5 +54,27 @@ router.post('/', authMiddleware, async (req, res) => {
         res.status(500).json({ error: 'Server error' });
     }
 });
+router.get('/', authMiddleware, async (req, res) => {
+    
+    // 1. Get the serverId from the URL (merged from index.js)
+    const { serverId } = req.params;
+    
+    // We don't need the userId, because anyone *in* the server
+    // should be able to *see* the channels. (We can add that
+    // permission check later if we want).
+
+    try {
+        const channels = await pool.query(
+            'SELECT * FROM Channels WHERE server_id = $1 ORDER BY created_at ASC',
+            [serverId]
+        );
+        res.json(channels.rows);
+
+    } 
+    catch (err) {
+        console.error("Get Channels Error:", err.message);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
 
 module.exports = router;

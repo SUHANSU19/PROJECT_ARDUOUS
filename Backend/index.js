@@ -6,7 +6,8 @@ require('dotenv').config(); // Still need this for the PORT
 // Import our routers
 const usersRouter = require('./routes/users');
 const serversRouter = require('./routes/servers');
-const channelsRouter = require('./routes/channels')
+const channelsRouter = require('./routes/channels');
+const messagesRouter = require('./routes/messages');
 
 const app = express();
 
@@ -24,6 +25,7 @@ app.get('/', (req, res) => {
 app.use('/api/users', usersRouter);
 app.use('/api/servers', serversRouter);
 app.use('/api/servers/:serverId/channels', channelsRouter);
+app.use('/api/channels/:channelId/messages', messagesRouter)
 
 
 // --- Start the Server ---
